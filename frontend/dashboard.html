@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Banking App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        section {
+            margin-top: 5%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">Banking App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="login.html" id="logoutButton">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Section -->
+    <section class="dashboard py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Welcome, <span id="usernameDisplay"></span></h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Account Number: <span id="accNumber"></span></h3>
+                    <h4>Account Balance: ₹<span id="balance"></span></h4>
+                </div>
+                <div class="col-md-6 text-end">
+                    <!-- Button to view mini statement -->
+<!-- <button id="viewMiniStatementBtn" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#miniStatementModal">
+    View Mini Statement
+</button> -->
+
+                    <button  id="viewMiniStatementBtn"  class="btn btn-info" data-bs-toggle="modal" data-bs-target="#miniStatementModal">Mini Statement</button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#depositModal">Deposit</button>
+                    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#withdrawModal">Withdraw</button>
+                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#transferModal">Transfer</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deposit Modal -->
+    <div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="depositModalLabel">Deposit Money</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="depositForm">
+                        <div class="mb-3">
+                            <label for="depositAmount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="depositAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="depositPin" class="form-label">PIN</label>
+                            <input type="password" class="form-control" id="depositPin" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Deposit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div class="modal fade" id="withdrawModal" tabindex="-1" aria-labelledby="withdrawModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="withdrawModalLabel">Withdraw Money</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="withdrawForm">
+                        <div class="mb-3">
+                            <label for="withdrawAmount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="withdrawAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="withdrawPin" class="form-label">PIN</label>
+                            <input type="password" class="form-control" id="withdrawPin" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100">Withdraw</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Transfer Money Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferModalLabel">Transfer Money</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Transfer Form -->
+                <form id="transferForm">
+                    <div class="mb-3">
+                        <label for="senderUsername" class="form-label">Sender Username</label>
+                        <input type="text" class="form-control" id="senderUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="senderAccountNumber" class="form-label">Sender Account Number</label>
+                        <input type="text" class="form-control" id="senderAccountNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipientUsername" class="form-label">Recipient Username</label>
+                        <input type="text" class="form-control" id="recipientUsername" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipientAccountNumber" class="form-label">Recipient Account Number</label>
+                        <input type="text" class="form-control" id="recipientAccountNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="pin" class="form-label">Your PIN</label>
+                        <input type="password" class="form-control" id="pin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" required min="1">
+                    </div>
+                    <button type="submit" class="btn btn-info w-100">Transfer</button>
+                    <div id="transferError" class="text-danger mt-2" style="display:none;"></div>
+                    <div id="transferSuccess" class="text-success mt-2" style="display:none;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Mini Statement Modal -->
+<div class="modal fade" id="miniStatementModal" tabindex="-1" aria-labelledby="miniStatementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="miniStatementModalLabel">Mini Statement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Mini Statement Table -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Transaction Type</th>
+                            <th>Amount</th>
+                            <th>Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="miniStatementBody">
+                        <!-- Transaction data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="./dashboard.js"></script>
+ 
+</body>
+
+</html>

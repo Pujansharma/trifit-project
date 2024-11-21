@@ -1,0 +1,49 @@
+
+body {
+font-family: 'Arial', sans-serif;
+}
+
+.navbar {
+background-color: #007bff;
+}
+nav{
+    padding-bottom: 20%;
+}
+.hero {
+background: linear-gradient(135deg, #010540, #330753);
+}
+
+.hero h1 {
+font-size: 3.5rem;
+}
+
+.hero p {
+font-size: 1.25rem;
+}
+
+footer {
+ 
+background-color: #333;
+color: white;
+}
+
+.registration-form, .login-form, .dashboard {
+
+padding-top: 10%; /* To offset navbar */
+}
+
+.btn {
+background-color: #007bff;
+border: none;
+font-size: 1.2rem;
+}
+
+.btn:hover {
+background-color: #0056b3;
+}
+
+#registerMessage, #loginMessage {
+color: red;
+font-weight: bold;
+}
+
