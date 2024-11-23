@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
     } else {
         user.failedLoginAttempts += 1;
         if (user.failedLoginAttempts >= 3) {
-            user.lockedUntil = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+            user.lockedUntil = Date.now() + 24 * 60 * 60 * 1000; 
         }
         await user.save();
         res.status(401).json({ error: 'Invalid credentials' });
@@ -153,67 +153,97 @@ router.post('/withdraw', async (req, res) => {
       res.status(401).json({ error: 'Invalid PIN' });
   }
 });
+
+
 router.post('/transfer', async (req, res) => {
-    const { senderUsername, recipientUsername, recipientAccountNumber, pin, amount } = req.body;
-  
-    // Look up the sender and recipient by their usernames
-    const sender = await User.findOne({ username: senderUsername });
-    const recipient = await User.findOne({ username: recipientUsername });
-  
-    // Check if sender exists and if the account is locked
-    if (!sender || sender.lockedUntil > Date.now()) {
-      return res.status(403).json({ error: 'Sender account is locked or does not exist' });
-    }
-  
-    // Check if recipient exists
-    if (!recipient) {
-      return res.status(404).json({ error: 'Recipient does not exist' });
-    }
-  
-    // Validate sender's PIN
-    const isMatch = await bcrypt.compare(pin, sender.pin);
-    if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid PIN' });
-    }
-  
-    // Check if sender has enough balance
-    if (sender.balance >= amount) {
-      // Perform the transfer
-      sender.balance -= amount;
-      recipient.balance += amount;
-  
-      // Log the transaction for the sender, including recipient's account number
-      sender.transactions.push({
-        type: 'Transfer',
-        amount,
-        balanceAfter: sender.balance,
-        recipient: recipient.username,
-        recipientAccountNumber: recipientAccountNumber,  // Include recipient's account number
-      });
-  
+    const { recipientAccountNumber, pin, amount } = req.body;
 
-      recipient.transactions.push({
-        type: 'Transfer',
-        amount,
-        balanceAfter: recipient.balance,
-        sender: sender.username,
-        senderAccountNumber: sender.accountNumber,  
-      });
-  
+    try {
+        // Validate input
+        if (!recipientAccountNumber || !pin || !amount) {
+            return res.status(400).json({ error: 'Recipient account, PIN, and amount are required' });
+        }
 
-      await sender.save();
-      await recipient.save();
-  
- 
-      return res.json({
-        message: 'Transfer successful',
-        senderBalance: sender.balance,
-        recipientBalance: recipient.balance
-      });
-    } else {
-      return res.status(400).json({ error: 'Insufficient balance' });
+        // Extract sender from the token
+        const token = req.headers['authorization']?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ error: 'Access token required' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const sender = await User.findById(decoded.id);
+
+        if (!sender) {
+            return res.status(404).json({ error: 'Sender account not found' });
+        }
+
+        // Check if sender's account is locked
+        if (sender.lockedUntil && sender.lockedUntil > Date.now()) {
+            return res.status(403).json({ error: 'Sender account is locked' });
+        }
+
+        // Validate sender's PIN
+        const isMatch = await bcrypt.compare(pin, sender.pin);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid PIN' });
+        }
+
+        // Check if the recipient is the same as the sender
+        if (recipientAccountNumber === sender.accountNumber) {
+            return res.status(400).json({ error: 'You cannot transfer funds to your own account' });
+        }
+
+        // Fetch recipient
+        const recipient = await User.findOne({ accountNumber: recipientAccountNumber });
+        if (!recipient) {
+            return res.status(404).json({ error: 'Recipient does not exist' });
+        }
+
+        // Check if the recipient's account is locked
+        if (recipient.lockedUntil && recipient.lockedUntil > Date.now()) {
+            return res.status(403).json({ error: 'Recipient account is locked' });
+        }
+
+        // Check if sender has sufficient balance
+        if (sender.balance < amount) {
+            return res.status(400).json({ error: 'Insufficient balance' });
+        }
+
+        // Perform the transfer
+        sender.balance -= amount;
+        recipient.balance += amount;
+
+        // Log transactions
+        sender.transactions.push({
+            type: 'Transfer',
+            amount,
+            balanceAfter: sender.balance,
+            recipientAccountNumber,
+        });
+
+        recipient.transactions.push({
+            type: 'Transfer',
+            amount,
+            balanceAfter: recipient.balance,
+            senderAccountNumber: sender.accountNumber,
+        });
+
+        // Save changes to the database
+        await sender.save();
+        await recipient.save();
+
+        res.json({
+            message: 'Transfer successful',
+            senderBalance: sender.balance,
+            recipientBalance: recipient.balance,
+        });
+    } catch (error) {
+        console.error('Error processing transfer:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  });
+});
+
+
 
 
 
